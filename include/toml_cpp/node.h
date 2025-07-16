@@ -6,17 +6,24 @@
 #include <variant>
 #include <vector>
 
+#include "toml_cpp/local_date.h"
+#include "toml_cpp/local_date_time.h"
+#include "toml_cpp/local_time.h"
+#include "toml_cpp/offset_date_time.h"
+
 namespace toml {
 class Node;
 
-using NodeValue = std::variant<
-  std::string,
-  int64_t,
-  double,
-  bool,
-  std::vector<std::shared_ptr<Node> >,
-  std::map<std::string, std::shared_ptr<Node> >
->;
+using NodeValue = std::variant<std::string,
+                               int64_t,
+                               double,
+                               bool,
+                               std::vector<std::shared_ptr<Node>>,
+                               std::map<std::string, std::shared_ptr<Node>>,
+                               offset_date_time,
+                               LocalDateTime,
+                               LocalDate,
+                               LocalTime>;
 
 /**
  * @class Node
@@ -26,9 +33,10 @@ using NodeValue = std::variant<
  * It provides a unified interface for all data types supported by TOML.
  */
 class Node {
-public:
-  // The actual value of the node, which can be any of the types defined in NodeValue.
-  NodeValue value;
+ public:
+  // The actual value of the node, which can be any of the types defined in
+  // NodeValue.
+  NodeValue value{};
 
   /**
    * @brief Default constructor.
@@ -48,38 +56,61 @@ public:
    * @brief Checks if the node holds a string.
    * @return True if the node holds a string, false otherwise.
    */
-  [[nodiscard]] bool is_string() const { return std::holds_alternative<std::string>(value); }
+  [[nodiscard]] bool is_string() const {
+    return std::holds_alternative<std::string>(value);
+  }
 
   /**
    * @brief Checks if the node holds an integer.
    * @return True if the node holds an integer, false otherwise.
    */
-  [[nodiscard]] bool is_integer() const { return std::holds_alternative<int64_t>(value); }
+  [[nodiscard]] bool is_integer() const {
+    return std::holds_alternative<int64_t>(value);
+  }
 
   /**
    * @brief Checks if the node holds a float.
    * @return True if the node holds a float, false otherwise.
    */
-  [[nodiscard]] bool is_float() const { return std::holds_alternative<double>(value); }
+  [[nodiscard]] bool is_float() const {
+    return std::holds_alternative<double>(value);
+  }
 
   /**
    * @brief Checks if the node holds a boolean.
    * @return True if the node holds a boolean, false otherwise.
    */
-  [[nodiscard]] bool is_boolean() const { return std::holds_alternative<bool>(value); }
+  [[nodiscard]] bool is_boolean() const {
+    return std::holds_alternative<bool>(value);
+  }
 
   /**
    * @brief Checks if the node holds an array.
    * @return True if the node holds an array, false otherwise.
    */
-  [[nodiscard]] bool is_array() const { return std::holds_alternative<std::vector<std::shared_ptr<Node> > >(value); }
+  [[nodiscard]] bool is_array() const {
+    return std::holds_alternative<std::vector<std::shared_ptr<Node>>>(value);
+  }
 
   /**
    * @brief Checks if the node holds a table.
    * @return True if the node holds a table, false otherwise.
    */
   [[nodiscard]] bool is_table() const {
-    return std::holds_alternative<std::map<std::string, std::shared_ptr<Node> > >(value);
+    return std::holds_alternative<std::map<std::string, std::shared_ptr<Node>>>(value);
+  }
+
+  [[nodiscard]] bool is_offset_datetime() const {
+    return std::holds_alternative<offset_date_time>(value);
+  }
+  [[nodiscard]] bool is_local_datetime() const {
+    return std::holds_alternative<LocalDateTime>(value);
+  }
+  [[nodiscard]] bool is_local_date() const {
+    return std::holds_alternative<LocalDate>(value);
+  }
+  [[nodiscard]] bool is_local_time() const {
+    return std::holds_alternative<LocalTime>(value);
   }
 
   // Const value retrieval methods with type safety
@@ -89,36 +120,44 @@ public:
    * @return A const reference to the string value.
    * @throws std::bad_variant_access if the node does not hold a string.
    */
-  [[nodiscard]] const std::string &as_string() const { return std::get<std::string>(value); }
+  [[nodiscard]] const std::string &as_string() const {
+    return std::get<std::string>(value);
+  }
 
   /**
    * @brief Gets the integer value of the node.
    * @return The integer value.
    * @throws std::bad_variant_access if the node does not hold an integer.
    */
-  [[nodiscard]] int64_t as_integer() const { return std::get<int64_t>(value); }
+  [[nodiscard]] int64_t as_integer() const {
+    return std::get<int64_t>(value);
+  }
 
   /**
    * @brief Gets the float value of the node.
    * @return The float value.
    * @throws std::bad_variant_access if the node does not hold a float.
    */
-  [[nodiscard]] double as_float() const { return std::get<double>(value); }
+  [[nodiscard]] double as_float() const {
+    return std::get<double>(value);
+  }
 
   /**
    * @brief Gets the boolean value of the node.
    * @return The boolean value.
    * @throws std::bad_variant_access if the node does not hold a boolean.
    */
-  [[nodiscard]] bool as_boolean() const { return std::get<bool>(value); }
+  [[nodiscard]] bool as_boolean() const {
+    return std::get<bool>(value);
+  }
 
   /**
    * @brief Gets the array value of the node.
    * @return A const reference to the vector of nodes.
    * @throws std::bad_variant_access if the node does not hold an array.
    */
-  [[nodiscard]] const std::vector<std::shared_ptr<Node> > &as_array() const {
-    return std::get<std::vector<std::shared_ptr<Node> > >(value);
+  [[nodiscard]] const std::vector<std::shared_ptr<Node>> &as_array() const {
+    return std::get<std::vector<std::shared_ptr<Node>>>(value);
   }
 
   /**
@@ -126,8 +165,21 @@ public:
    * @return A const reference to the map of nodes.
    * @throws std::bad_variant_access if the node does not hold a table.
    */
-  [[nodiscard]] const std::map<std::string, std::shared_ptr<Node> > &as_table() const {
-    return std::get<std::map<std::string, std::shared_ptr<Node> > >(value);
+  [[nodiscard]] const std::map<std::string, std::shared_ptr<Node>> &as_table() const {
+    return std::get<std::map<std::string, std::shared_ptr<Node>>>(value);
+  }
+
+  [[nodiscard]] const offset_date_time &as_offset_datetime() const {
+    return std::get<offset_date_time>(value);
+  }
+  [[nodiscard]] const LocalDateTime &as_local_datetime() const {
+    return std::get<LocalDateTime>(value);
+  }
+  [[nodiscard]] const LocalDate &as_local_date() const {
+    return std::get<LocalDate>(value);
+  }
+  [[nodiscard]] const LocalTime &as_local_time() const {
+    return std::get<LocalTime>(value);
   }
 
   // Mutable value retrieval methods
@@ -137,36 +189,44 @@ public:
    * @return A reference to the string value.
    * @throws std::bad_variant_access if the node does not hold a string.
    */
-  std::string &as_string() { return std::get<std::string>(value); }
+  std::string &as_string() {
+    return std::get<std::string>(value);
+  }
 
   /**
    * @brief Gets the integer value of the node.
    * @return A reference to the integer value.
    * @throws std::bad_variant_access if the node does not hold an integer.
    */
-  int64_t &as_integer() { return std::get<int64_t>(value); }
+  int64_t &as_integer() {
+    return std::get<int64_t>(value);
+  }
 
   /**
    * @brief Gets the float value of the node.
    * @return A reference to the float value.
    * @throws std::bad_variant_access if the node does not hold a float.
    */
-  double &as_float() { return std::get<double>(value); }
+  double &as_float() {
+    return std::get<double>(value);
+  }
 
   /**
    * @brief Gets the boolean value of the node.
    * @return A reference to the boolean value.
    * @throws std::bad_variant_access if the node does not hold a boolean.
    */
-  bool &as_boolean() { return std::get<bool>(value); }
+  bool &as_boolean() {
+    return std::get<bool>(value);
+  }
 
   /**
    * @brief Gets the array value of the node.
    * @return A reference to the vector of nodes.
    * @throws std::bad_variant_access if the node does not hold an array.
    */
-  std::vector<std::shared_ptr<Node> > &as_array() {
-    return std::get<std::vector<std::shared_ptr<Node> > >(value);
+  std::vector<std::shared_ptr<Node>> &as_array() {
+    return std::get<std::vector<std::shared_ptr<Node>>>(value);
   }
 
   /**
@@ -174,8 +234,21 @@ public:
    * @return A reference to the map of nodes.
    * @throws std::bad_variant_access if the node does not hold a table.
    */
-  std::map<std::string, std::shared_ptr<Node> > &as_table() {
-    return std::get<std::map<std::string, std::shared_ptr<Node> > >(value);
+  std::map<std::string, std::shared_ptr<Node>> &as_table() {
+    return std::get<std::map<std::string, std::shared_ptr<Node>>>(value);
+  }
+
+  offset_date_time &as_offset_datetime() {
+    return std::get<offset_date_time>(value);
+  }
+  LocalDateTime &as_local_datetime() {
+    return std::get<LocalDateTime>(value);
+  }
+  LocalDate &as_local_date() {
+    return std::get<LocalDate>(value);
+  }
+  LocalTime &as_local_time() {
+    return std::get<LocalTime>(value);
   }
 
   // Templated accessors
@@ -184,9 +257,10 @@ public:
    * @brief Generic method to get the value of the node.
    * @tparam T The type of the value to retrieve.
    * @return A const reference to the value.
-   * @throws std::bad_variant_access if the node does not hold the specified type.
+   * @throws std::bad_variant_access if the node does not hold the specified
+   * type.
    */
-  template<typename T>
+  template <typename T>
   const T &as() const {
     return std::get<T>(value);
   }
@@ -195,9 +269,10 @@ public:
    * @brief Generic method to get the value of the node.
    * @tparam T The type of the value to retrieve.
    * @return A reference to the value.
-   * @throws std::bad_variant_access if the node does not hold the specified type.
+   * @throws std::bad_variant_access if the node does not hold the specified
+   * type.
    */
-  template<typename T>
+  template <typename T>
   T &as() {
     return std::get<T>(value);
   }
@@ -213,20 +288,42 @@ inline void PrintNode(const Node &node, const int indent = 0) {
     std::cout << node.as_float();
   } else if (node.is_boolean()) {
     std::cout << (node.as_boolean() ? "true" : "false");
+    // } else if (node.is_offset_datetime()) {
+    //   std::cout << '"' << node.as_offset_datetime() << '"';
+    // } else if (node.is_local_datetime()) {
+    //   std::cout << '"' << node.as_local_datetime() << '"';
+    // } else if (node.is_local_date()) {
+    //   std::cout << '"' << node.as_local_date() << '"';
+  } else if (node.is_local_time()) {
+    std::cout << '"' << node.as_local_time() << '"';
   } else if (node.is_table()) {
     std::cout << "{\n";
     const auto &table = node.as_table();
     for (auto it = table.begin(); it != table.end(); ++it) {
       std::cout << indentation << "  \"" << it->first << "\": ";
-      PrintNode(*(it->second), indent + 1);
+      PrintNode(*it->second, indent + 1);
       if (std::next(it) != table.end()) {
         std::cout << ",";
       }
       std::cout << "\n";
     }
     std::cout << indentation << "}";
+  } else if (node.is_array()) {
+    std::cout << "[\n";
+    const auto &arr = node.as_array();
+    for (auto it = arr.begin(); it != arr.end(); ++it) {
+      std::cout << indentation << "  ";
+      PrintNode(**it, indent + 1);
+      if (std::next(it) != arr.end()) {
+        std::cout << ",";
+      }
+      std::cout << "\n";
+    }
+    std::cout << indentation << "]";
+  } else {
+    std::cout << "[Unknown Node Type]";
   }
 }
-}
+}  // namespace toml
 
-#endif //TOML_CPP_NODE_H
+#endif  // TOML_CPP_NODE_H

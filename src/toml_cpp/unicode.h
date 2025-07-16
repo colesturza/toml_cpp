@@ -1,14 +1,10 @@
-//
-// Created by coles on 7/11/2025.
-//
+#ifndef TOML_CPP_UNICODE_H
+#define TOML_CPP_UNICODE_H
 
-#ifndef TOML_CPP_UNICODE_HPP
-#define TOML_CPP_UNICODE_HPP
-
-#include <string>
-#include <stdexcept>
-#include <iomanip>
 #include <cstdint>
+#include <iomanip>
+#include <stdexcept>
+#include <string>
 
 namespace toml::util {
 inline std::string unicode_codepoint(const std::string &hex, int length) {
@@ -47,6 +43,6 @@ inline std::string unicode_codepoint(const std::string &hex, int length) {
 
   return utf8;
 }
-}
+}  // namespace toml::util
 
-#endif //TOML_CPP_UNICODE_HPP
+#endif  // TOML_CPP_UNICODE_H

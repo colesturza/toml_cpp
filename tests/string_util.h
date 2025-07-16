@@ -1,11 +1,10 @@
 #ifndef TOML_CPP_TESTS_STRING_UTIL_HPP
 #define TOML_CPP_TESTS_STRING_UTIL_HPP
 
-#include <string>
-#include <sstream>
-#include <iostream>
 #include <algorithm>
 #include <cctype>
+#include <sstream>
+#include <string>
 
 namespace toml::tests::util {
 inline std::string dedent(const std::string &input) {
@@ -40,12 +39,12 @@ inline std::string dedent(const std::string &input) {
     if (line.size() >= min_indent) {
       oss << line.substr(min_indent);
     } else {
-      oss << line; // line shorter than indent (likely blank)
+      oss << line;  // line shorter than indent (likely blank)
     }
     oss << '\n';
   }
   return oss.str();
 }
-}
+}  // namespace toml::tests::util
 
-#endif //TOML_CPP_TESTS_STRING_UTIL_HPP
+#endif  // TOML_CPP_TESTS_STRING_UTIL_HPP

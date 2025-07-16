@@ -9,7 +9,14 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-add_library(toml_cpp SHARED src/Lexer.cpp src/Parser.cpp)
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
+
+include(ClangFormatProject)
+add_clang_format_target(
+  DIRECTORIES ${CMAKE_SOURCE_DIR}/src ${CMAKE_SOURCE_DIR}/include ${CMAKE_SOURCE_DIR}/tests
+)
+
+add_library(toml_cpp SHARED src/toml_cpp/lexer.cc src/toml_cpp/parser.cc)
 add_library(toml_cpp::toml_cpp ALIAS toml_cpp)
 
 target_include_directories(
@@ -40,7 +47,10 @@ if(TOML_CPP_BUILD_TESTS)
 
   FetchContent_MakeAvailable(googletest)
 
-  add_executable(toml_cpp_tests tests/Lexer.test.cpp tests/Parser.test.cpp)
+  add_executable(
+    toml_cpp_tests tests/test_lexer.cc tests/test_parser.cc
+                   tests/test_local_time.cc tests/test_local_date.cc
+  )
 
   target_link_libraries(toml_cpp_tests PRIVATE toml_cpp GTest::gtest_main)
 

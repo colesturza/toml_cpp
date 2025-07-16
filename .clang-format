@@ -1,0 +1,52 @@
+# .clang-format
+#
+# This file configures the coding style for the clang-format tool.
+# Place this file in the root directory of your project.
+#
+# Language: C++
+Language: Cpp
+
+# Base the style on LLVM's coding standards, with modifications below.
+BasedOnStyle: Google
+
+# --- Include Sorting ---
+
+# Enable sorting of #include directives.
+SortIncludes: CaseInsensitive
+
+# Define categories for include sorting.
+# Clang-format will group includes based on these categories and then sort
+# them alphabetically within each group. The 'Priority' determines the order
+# of the groups. Lower numbers come first.
+IncludeCategories:
+  # Category 1: C++ standard library headers (e.g., <vector>, <string>)
+  # Matches headers that start with a lowercase letter.
+  - Regex:           '^<[a-z].*>'
+    Priority:        1
+    SortPriority:    1
+
+  # Category 2: C-style and other library headers (e.g., <stdio.h>, <custom/lib.h>)
+  # Matches any other header included with angle brackets.
+  - Regex:           '^<.*\.h>'
+    Priority:        2
+    SortPriority:    2
+
+  # Category 3: Project-specific headers (e.g., "my_header.h", "utils/helpers.h")
+  # Matches any header included with double quotes.
+  - Regex:           '^".*"'
+    Priority:        3
+    SortPriority:    3
+
+# --- Other Common Style Options ---
+
+# Set the column limit for line wrapping.
+ColumnLimit: 100
+
+# Allow putting short functions on a single line.
+AllowShortFunctionsOnASingleLine: None
+
+# How to wrap function parameters.
+BinPackParameters: false
+
+# Indent width.
+IndentWidth: 2
