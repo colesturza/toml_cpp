@@ -6,7 +6,6 @@
 CMakeCache.txt
 cmake_install.cmake
 Makefile
-*.cmake
 *.dir/
 *.pdb
 *.suo
